@@ -16,7 +16,7 @@ class UserTemplateOverride(models.Model):
     user: 'user2', priority: 1, override_name; 'Some override'
 
     """
-    user = models.FireignKey(User, related_name='tmpl_overrides')
+    user = models.ForeignKey(User, related_name='tmpl_overrides')
     override_name = models.CharField(max_length=255)
     template_dir = models.CharField(max_length=255)
     priority = models.PositiveSmallIntegerField(default=1)

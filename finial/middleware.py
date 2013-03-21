@@ -9,7 +9,7 @@ DEFAULT_TEMPLATE_DIRS = (
     settings.PROJECT_PATH + '/templates',
 )
 
-class TemplateOverrideMiddlware(object):
+class TemplateOverrideMiddleware(object):
     """Override templates on a per-user basis; modify TEMPLATE_DIRS.
 
     Since we're using request.user for most of our logic, this

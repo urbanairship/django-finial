@@ -9,6 +9,8 @@ Definition
 fin·i·al  
 `/finēəl/`
 *Noun*
+
+
 1. A distinctive ornament at the apex of a roof, pinnacle, canopy, or
 similar structure.
 2. An ornament at the top, end, or corner of an object such as a post,

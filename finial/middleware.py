@@ -27,25 +27,34 @@ class TemplateOverrideMiddleware(object):
         Here the assumption is that the model fields for:
             user, override_name, tempalte_dir, priority
 
-        TODO: move the caching logic into the model class.
-
         """
-        override_pks = cache.get(self.get_tmpl_override_cache_key(request.user))
-        if override_pks is not None:
+        settings.TEMPLATE_DIRS = DEFAULT_TEMPLATE_DIRS
+        override_values = cache.get(self.get_tmpl_override_cache_key(request.user))
+        overrides = None
+        if override_values is not None:
             # If we have *something* set, even an empty list
-            override_pks = json.loads(override_pks)
-            if len(override_pks) is not 0:
-                # If the thing we have set is *not* and empty list
-                # i.e. we have some override_pks cached.
-                overrides = models.UserTemplateOverride.objects.filter(
-                    pk__in=override_pks
-                ).order_by('priority')
-
-                template_dirs = [override.template_dir for override in overrides]
-                template_dirs.append(DEFAULT_TEMPLATE_DIRS[0])
-                settings.TEMPLATE_DIRS = tuple(template_dirs)
+            override_values = json.loads(override_values)
         else:
-            settings.TEMPLATE_DIRS = DEFAULT_TEMPLATE_DIRS
+            overrides = models.UserTemplateOverride.objects.filter(
+                user=request.user
+            ).order_by('priority')
+            override_values = [override.template_dir for override in overrides]
+
+        if override_values:
+            if overrides:
+                # If we picked these up from the database; need to add defaults.
+                override_values.append(DEFAULT_TEMPLATE_DIRS[0])
+
+            settings.TEMPLATE_DIRS = tuple(override_values)
+            # Cache whatever we've found in the database.
+            cache.set(
+                self.get_tmpl_override_cache_key(request.user),
+                json.dumps(override_values),
+                600
+            )
+        else:
+            # Cache the negative presence of overrides.
+            cache.set(self.get_tmpl_override_cache_key(request.user),'[]', 600)
 
         return None
 

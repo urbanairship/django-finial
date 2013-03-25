@@ -23,3 +23,5 @@ class FakeOverrideModel(object):
         self.template_name = kwargs.get('template_name', 'test')
         self.template_dir = kwargs.get('template_dir', '/override')
         self.priority = kwargs.get('priority', 1)
+
+

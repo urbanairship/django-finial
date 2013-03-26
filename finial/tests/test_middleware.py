@@ -1,7 +1,6 @@
 import mimic
 
 from django.core.cache import cache
-from mock_django import query as mock_query, models as mock_models
 
 from finial.tests import utils
 from finial import middleware
@@ -55,15 +54,6 @@ class MiddlewareTest(mimic.MimicTestBase):
     def test_single_override_value_cached(self):
         """Test that an override is picked up and put at top of list."""
         expected = ('/override', './templates')
-        # Setting up mocks for model interactions.
-        fake_override_model = mock_models.ModelMock(models.UserTemplateOverride )
-        fake_override_qs = mock_query.QuerySetMock(fake_override_model, 'order_by', 'values_list')
-
-        def fake_filter(*args, **kwargs):
-            return fake_override_qs
-
-        models.UserTemplateOverride.objects.filter = fake_filter
-
         # Setup fake request, and make sure there is a cached value.
         fake_request = utils.FakeRequest()
         cache.set(
@@ -71,8 +61,6 @@ class MiddlewareTest(mimic.MimicTestBase):
             '["/override", "./templates"]',
             60
         )
-
-        self.mimic.replay_all()
 
         self.mw.process_request(fake_request)
         self.assertEqual(middleware.settings.TEMPLATE_DIRS, expected)

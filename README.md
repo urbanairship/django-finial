@@ -10,6 +10,7 @@ fin·i·al
 `/finēəl/`
 *Noun*
 
+![Alt text](finial.png "Example of a finial in architecture.")
 
 1. A distinctive ornament at the apex of a roof, pinnacle, canopy, or
 similar structure.

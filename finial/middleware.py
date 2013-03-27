@@ -32,22 +32,34 @@ class TemplateOverrideMiddleware(object):
         return 'tmpl_override:user_id:{0}'.format(user.pk)
 
     def override_urlconf(self, request, overrides):
-        """If there are overrides, we make a custom urlconf."""
+        """If there are overrides, we make a custom urlconf.
+
+        :param request: a django HttpRequest instance.
+        :param overrides: a list of dicts, representing override models.
+        :return: urlconf instance, new urlconf with overrides first.
+
+        .. note:: this function also modifies request.urlconf!
+
+        """
         url_override_cls = getattr(settings, 'FINIAL_URL_OVERRIDES', None)
         if not url_override_cls:
             return
 
         url_override_inst = get_module_by_path(url_override_cls)
-        # These should be in priority order, higher priority at the top.
         args = []
+        # These should be in priority order, higher priority at the top.
         for override in overrides:
-            url_pattern = url_override_inst.override_urlpatterns[
+            url_pattern = url_override_inst.override_urlpatterns.get(
                 override['template_name']
-            ]
+            )
+            if not url_pattern:
+                continue
+
             args.append(url(
                 r'^', include(url_pattern, namespace=override['template_name'])
             ))
 
+        # At the very end, we should include the original ROOT_URLCONF
         args.append(url(r'^', include(getattr(
             get_module_by_path(settings.ROOT_URLCONF), 'urlpatterns'
         ))))

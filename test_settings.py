@@ -1,4 +1,4 @@
-# (c) 2012 Urban Airship and Contributors
+# (c) 2013 Urban Airship and Contributors
 
 DATABASES = {'default':{
     'NAME':'project.db',
@@ -12,8 +12,6 @@ CACHES = {
     }
 }
 
-# install the bare minimum for
-# testing mithril
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -32,4 +30,8 @@ PROJECT_PATH = '.'
 # turn this file into a pseudo-urls.py.
 from django.conf.urls import *
 
-urlpatterns = patterns('')
+default_fake_view = lambda *args, **kwargs: None
+
+urlpatterns = patterns('',
+    url(r'/view1', 'default_fake_view', name='view1'),
+)

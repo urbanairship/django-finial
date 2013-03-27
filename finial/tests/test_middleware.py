@@ -2,6 +2,7 @@ import mimic
 import json
 
 from django.core.cache import cache
+from django.core.urlresolvers import reverse
 
 from finial.tests import utils
 from finial import middleware
@@ -201,3 +202,27 @@ class MiddlewareTest(mimic.MimicTestBase):
         self.mw.process_request(fake_request)
 
         self.assertEqual(middleware.settings.TEMPLATE_DIRS, expected)
+
+    def test_override_urlconf(self):
+        """Test success case for overriding a request's urlconf."""
+        view_url = '/view1'
+        middleware.settings = utils.fake_settings(
+            TEMPLATE_DIRS=self.template_dirs,
+            PROJECT_PATH='.',
+            FINIAL_URL_OVERRIDES='finial.tests.finial_test_overrides',
+            ROOT_URLCONF='test_settings'
+        )
+        fake_request = utils.FakeRequest()
+        overrides = [{
+            'pk': 1,
+            'template_name': 'override',
+            'template_dir': '/override',
+            'priority': 1,
+        }]
+        mid_inst = middleware.TemplateOverrideMiddleware()
+        test_urlconf = mid_inst.override_urlconf(fake_request, overrides)
+
+        self.assertEqual(len(test_urlconf), 2)
+        self.assertEqual(test_urlconf[0].resolve(view_url).func, 'override_view')
+        self.assertEqual(test_urlconf[1].resolve(view_url).func, 'default_fake_view')
+

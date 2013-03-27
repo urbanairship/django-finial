@@ -1,6 +1,7 @@
 import simplejson as json
 
 from django.conf import settings
+from django.conf.urls.defaults import include, patterns, url
 from django.core.cache import cache
 from django.forms.models import model_to_dict
 
@@ -9,6 +10,14 @@ from finial import models
 DEFAULT_TEMPLATE_DIRS = (
     settings.PROJECT_PATH + '/templates',
 )
+
+
+def get_module_by_path(path):
+    mod = __import__(path)
+    for sub in path.split('.')[1:]:
+        mod = getattr(mod, sub)
+    return mod
+
 
 class TemplateOverrideMiddleware(object):
     """Override templates on a per-user basis; modify TEMPLATE_DIRS.
@@ -22,36 +31,28 @@ class TemplateOverrideMiddleware(object):
     def get_tmpl_override_cache_key(user):
         return 'tmpl_override:user_id:{0}'.format(user.pk)
 
-
-    def get_class_by_path(path):
-        mod = __import__('.'.join(path.split('.')[:-1]))
-        components = path.split('.')
-        for comp in components[1:]:
-            mod = getattr(mod, comp)
-
-        return mod
-
-
     def override_urlconf(self, request, overrides):
-        """If there are overrides, we make a custom urlconf.
-
-        overrides: atm this is a list of the tempalte_dir names: must change.
-        TODO(gavin): this is untested; need to test creating synthetic urlconfs
-
-        """
-        overrides_cls = getattr(settings, 'FINIAL_URL_OVERRIDES', None)
-        if not overrides_cls:
+        """If there are overrides, we make a custom urlconf."""
+        url_override_cls = getattr(settings, 'FINIAL_URL_OVERRIDES', None)
+        if not url_override_cls:
             return
 
-        override_patterns = []
+        url_override_inst = get_module_by_path(url_override_cls)
         # These should be in priority order, higher priority at the top.
+        args = []
         for override in overrides:
-            override_patterns.extend(
-                # Presumes that we're dealing with override_dicts
-                overrides_cls.override_urlpatterns[override['template_name']]
-            )
+            url_pattern = url_override_inst.override_urlpatterns[
+                override['template_name']
+            ]
+            args.append(url(
+                r'^', include(url_pattern, namespace=override['template_name'])
+            ))
 
-        request.urlconf = override_patterns + settings.ROOT_URLCONF
+        args.append(url(r'^', include(getattr(
+            get_module_by_path(settings.ROOT_URLCONF), 'urlpatterns'
+        ))))
+
+        request.urlconf = patterns('', *args)
 
         return request.urlconf
 

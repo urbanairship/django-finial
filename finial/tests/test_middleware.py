@@ -2,7 +2,6 @@ import mimic
 import json
 
 from django.core.cache import cache
-from django.core.urlresolvers import reverse
 
 from finial.tests import utils
 from finial import middleware
@@ -12,8 +11,8 @@ from finial import models
 def mock_model_to_dict(model):
     return {
         'pk': model.pk,
-        'template_name': model.template_name,
-        'template_dir': model.template_dir,
+        'override_name': model.override_name,
+        'override_dir': model.override_dir,
         'priority': model.priority
     }
 
@@ -22,9 +21,9 @@ class MiddlewareTest(mimic.MimicTestBase):
 
     def setUp(self):
         super(MiddlewareTest, self).setUp()
-        self.template_dirs = ('./templates',)
+        self.override_dirs = ('./templates',)
         self.settings = utils.fake_settings(
-            TEMPLATE_DIRS=self.template_dirs,
+            TEMPLATE_DIRS=self.override_dirs,
             PROJECT_PATH='.'
         )
         middleware.settings = self.settings
@@ -48,7 +47,7 @@ class MiddlewareTest(mimic.MimicTestBase):
 
         self.mw.process_request(fake_request)
 
-        self.assertEqual(middleware.settings.TEMPLATE_DIRS, self.template_dirs)
+        self.assertEqual(middleware.settings.TEMPLATE_DIRS, self.override_dirs)
 
     def test_empty_cached_override_value(self):
         """Test that we deal with cached empty values."""
@@ -62,15 +61,15 @@ class MiddlewareTest(mimic.MimicTestBase):
 
         self.mw.process_request(fake_request)
 
-        self.assertEqual(middleware.settings.TEMPLATE_DIRS, self.template_dirs)
+        self.assertEqual(middleware.settings.TEMPLATE_DIRS, self.override_dirs)
 
     def test_single_override_value_cached(self):
         """Test that an override is picked up and put at top of list."""
         fake_overrides = [
             {
                 'pk': 1,
-                'template_name': 'override',
-                'template_dir': '/override',
+                'override_name': 'override',
+                'override_dir': '/override',
                 'priority': 1
             },
         ]
@@ -122,18 +121,18 @@ class MiddlewareTest(mimic.MimicTestBase):
         fake_overrides = [
             {
                 'pk': 1,
-                'template_name': 'top_override',
-                'template_dir': '/top_override',
+                'override_name': 'top_override',
+                'override_dir': '/top_override',
                 'priority': 1,
             },
             {
-                'template_name': 'secondary_override',
-                'template_dir': '/secondary_override',
+                'override_name': 'secondary_override',
+                'override_dir': '/secondary_override',
                 'priority': 2,
             },
             {
-                'template_name': 'tertiary_override',
-                'template_dir': '/tertiary_override',
+                'override_name': 'tertiary_override',
+                'override_dir': '/tertiary_override',
                 'priority': 3,
             },
 
@@ -165,20 +164,20 @@ class MiddlewareTest(mimic.MimicTestBase):
 
         fake_override_model1 = utils.FakeOverrideModel(
             pk=1,
-            template_name='top',
-            template_dir='/top_override',
+            override_name='top',
+            override_dir='/top_override',
             priority=1,
         )
         fake_override_model2 = utils.FakeOverrideModel(
             pk=2,
-            template_name='second',
-            template_dir='/secondary_override',
+            override_name='second',
+            override_dir='/secondary_override',
             priority=2,
         )
         fake_override_model3 = utils.FakeOverrideModel(
             pk=3,
-            template_name='tertiary',
-            template_dir='/tertiary_override',
+            override_name='tertiary',
+            override_dir='/tertiary_override',
             priority=3,
         )
 
@@ -207,7 +206,7 @@ class MiddlewareTest(mimic.MimicTestBase):
         """Test success case for overriding a request's urlconf."""
         view_url = '/view1'
         middleware.settings = utils.fake_settings(
-            TEMPLATE_DIRS=self.template_dirs,
+            TEMPLATE_DIRS=self.override_dirs,
             PROJECT_PATH='.',
             FINIAL_URL_OVERRIDES='finial.tests.finial_test_overrides',
             ROOT_URLCONF='test_settings'
@@ -215,8 +214,8 @@ class MiddlewareTest(mimic.MimicTestBase):
         fake_request = utils.FakeRequest()
         overrides = [{
             'pk': 1,
-            'template_name': 'override',
-            'template_dir': '/override',
+            'override_name': 'override',
+            'override_dir': '/override',
             'priority': 1,
         }]
         mid_inst = middleware.TemplateOverrideMiddleware()

@@ -21,8 +21,8 @@ class FakeOverrideModel(object):
     """A simple OverrideModel stub."""
     def __init__(self, *args, **kwargs):
         self.pk = kwargs.get('pk', 1)
-        self.template_name = kwargs.get('template_name', 'test')
-        self.template_dir = kwargs.get('template_dir', '/override')
+        self.override_name = kwargs.get('override_name', 'test')
+        self.override_dir = kwargs.get('override_dir', '/override')
         self.priority = kwargs.get('priority', 1)
 
 

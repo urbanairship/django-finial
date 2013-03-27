@@ -13,7 +13,7 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='tmpl_overrides', to=orm['auth.User'])),
             ('override_name', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('template_dir', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('override_dir', self.gf('django.db.models.fields.CharField')(max_length=255)),
             ('priority', self.gf('django.db.models.fields.PositiveSmallIntegerField')(default=1)),
         ))
         db.send_create_signal('finial', ['UserTemplateOverride'])
@@ -64,9 +64,9 @@ class Migration(SchemaMigration):
         'finial.usertemplateoverride': {
             'Meta': {'object_name': 'UserTemplateOverride'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'override_dir': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'override_name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'priority': ('django.db.models.fields.PositiveSmallIntegerField', [], {'default': '1'}),
-            'template_dir': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tmpl_overrides'", 'to': "orm['auth.User']"})
         }
     }

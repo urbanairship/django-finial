@@ -18,5 +18,5 @@ class UserTemplateOverride(models.Model):
     """
     user = models.ForeignKey(User, related_name='tmpl_overrides')
     override_name = models.CharField(max_length=255)
-    template_dir = models.CharField(max_length=255)
+    override_dir = models.CharField(max_length=255)
     priority = models.PositiveSmallIntegerField(default=1)

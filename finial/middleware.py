@@ -50,13 +50,13 @@ class TemplateOverrideMiddleware(object):
         # These should be in priority order, higher priority at the top.
         for override in overrides:
             url_pattern = url_override_inst.override_urlpatterns.get(
-                override['template_name']
+                override['override_name']
             )
             if not url_pattern:
                 continue
 
             args.append(url(
-                r'^', include(url_pattern, namespace=override['template_name'])
+                r'^', include(url_pattern, namespace=override['override_name'])
             ))
 
         # At the very end, we should include the original ROOT_URLCONF
@@ -71,6 +71,8 @@ class TemplateOverrideMiddleware(object):
     def process_request(self, request):
         """See if there are any overrides, apply them to TEMPLATE_DIRS.
 
+        :param request: a django HttpRequest instance.
+/
         Here the assumption is that the model fields for:
             user, override_name, tempalte_dir, priority
 
@@ -78,7 +80,7 @@ class TemplateOverrideMiddleware(object):
         settings.TEMPLATE_DIRS = DEFAULT_TEMPLATE_DIRS
         override_values = cache.get(self.get_tmpl_override_cache_key(request.user))
         overrides = None
-        template_dir_overrides = []
+        override_dir_overrides = []
         if override_values is not None:
             # If we have *something* set, even an empty list
             override_values = json.loads(override_values)
@@ -94,14 +96,14 @@ class TemplateOverrideMiddleware(object):
             self.override_urlconf(request, override_values)
 
             # If we had a cached value
-            template_dir_overrides = [
-                override['template_dir'] for override in override_values
+            override_dir_overrides = [
+                override['override_dir'] for override in override_values
             ]
             # Add in the default TEMPLATE_DIR at the end
-            template_dir_overrides.append(DEFAULT_TEMPLATE_DIRS[0])
+            override_dir_overrides.append(DEFAULT_TEMPLATE_DIRS[0])
 
             # Temporarily set our global settings' TEMPLATE_DIRS var.
-            settings.TEMPLATE_DIRS = tuple(template_dir_overrides)
+            settings.TEMPLATE_DIRS = tuple(override_dir_overrides)
             # Cache whatever we've found in the database.
             cache.set(
                 self.get_tmpl_override_cache_key(request.user),

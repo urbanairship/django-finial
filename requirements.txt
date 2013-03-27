@@ -1,0 +1,4 @@
+Django==1.4.5
+South==0.7.6
+mimic==0.0.2
+simplejson==3.1.2

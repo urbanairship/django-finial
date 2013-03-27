@@ -1,10 +1,21 @@
 import mimic
+import json
 
 from django.core.cache import cache
 
 from finial.tests import utils
 from finial import middleware
 from finial import models
+
+
+def mock_model_to_dict(model):
+    return {
+        'pk': model.pk,
+        'template_name': model.template_name,
+        'template_dir': model.template_dir,
+        'priority': model.priority
+    }
+
 
 class MiddlewareTest(mimic.MimicTestBase):
 
@@ -16,6 +27,7 @@ class MiddlewareTest(mimic.MimicTestBase):
             PROJECT_PATH='.'
         )
         middleware.settings = self.settings
+        middleware.model_to_dict = mock_model_to_dict
         self.mw = middleware.TemplateOverrideMiddleware()
         cache.clear()
 
@@ -53,12 +65,20 @@ class MiddlewareTest(mimic.MimicTestBase):
 
     def test_single_override_value_cached(self):
         """Test that an override is picked up and put at top of list."""
+        fake_overrides = [
+            {
+                'pk': 1,
+                'template_name': 'override',
+                'template_dir': '/override',
+                'priority': 1
+            },
+        ]
         expected = ('/override', './templates')
         # Setup fake request, and make sure there is a cached value.
         fake_request = utils.FakeRequest()
         cache.set(
             self.mw.get_tmpl_override_cache_key(fake_request.user),
-            '["/override", "./templates"]',
+            json.dumps(fake_overrides),
             60
         )
 
@@ -98,12 +118,31 @@ class MiddlewareTest(mimic.MimicTestBase):
             './templates'
         )
 
+        fake_overrides = [
+            {
+                'pk': 1,
+                'template_name': 'top_override',
+                'template_dir': '/top_override',
+                'priority': 1,
+            },
+            {
+                'template_name': 'secondary_override',
+                'template_dir': '/secondary_override',
+                'priority': 2,
+            },
+            {
+                'template_name': 'tertiary_override',
+                'template_dir': '/tertiary_override',
+                'priority': 3,
+            },
+
+        ]
+
         # Setup fake request, and make sure there is a cached value.
         fake_request = utils.FakeRequest()
         cache.set(
             self.mw.get_tmpl_override_cache_key(fake_request.user),
-            ('["/top_override", "/secondary_override",'
-            '"/tertiary_override", "./templates"]'),
+            json.dumps(fake_overrides),
             60
         )
 
@@ -124,16 +163,19 @@ class MiddlewareTest(mimic.MimicTestBase):
         )
 
         fake_override_model1 = utils.FakeOverrideModel(
+            pk=1,
             template_name='top',
             template_dir='/top_override',
             priority=1,
         )
         fake_override_model2 = utils.FakeOverrideModel(
+            pk=2,
             template_name='second',
             template_dir='/secondary_override',
             priority=2,
         )
         fake_override_model3 = utils.FakeOverrideModel(
+            pk=3,
             template_name='tertiary',
             template_dir='/tertiary_override',
             priority=3,

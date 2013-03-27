@@ -20,6 +20,7 @@ class FakeRequest(object):
 class FakeOverrideModel(object):
     """A simple OverrideModel stub."""
     def __init__(self, *args, **kwargs):
+        self.pk = kwargs.get('pk', 1)
         self.template_name = kwargs.get('template_name', 'test')
         self.template_dir = kwargs.get('template_dir', '/override')
         self.priority = kwargs.get('priority', 1)

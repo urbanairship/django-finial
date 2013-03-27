@@ -13,7 +13,7 @@ class TemplateTagTest(mimic.MimicTestBase):
     def test_get_media_url(self):
         """test that our templatetag is able to override settings.MEDIA_URL."""
         override = 'overridden.ua.com'
-        context = Context({'MEDIA_URL': override})
+        context = Context({'X_MEDIA_URL': override})
         template = Template(TEMPLATE)
         rendered = template.render(context)
 

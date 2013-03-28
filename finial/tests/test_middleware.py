@@ -21,14 +21,17 @@ class MiddlewareTest(mimic.MimicTestBase):
 
     def setUp(self):
         super(MiddlewareTest, self).setUp()
-        self.override_dirs = ('./templates',)
+        self.override_template_dirs = ('./templates',)
+        self.override_static_dirs= ('./static',)
         self.settings = utils.fake_settings(
-            TEMPLATE_DIRS=self.override_dirs,
+            TEMPLATE_DIRS=self.override_template_dirs,
+            STATIC_DIRS=self.override_static_dirs,
             PROJECT_PATH='.'
         )
         middleware.settings = self.settings
         middleware.model_to_dict = mock_model_to_dict
         self.mw = middleware.TemplateOverrideMiddleware()
+        self.view_url = '/view1'
         cache.clear()
 
     def test_no_override(self):
@@ -47,7 +50,12 @@ class MiddlewareTest(mimic.MimicTestBase):
 
         self.mw.process_request(fake_request)
 
-        self.assertEqual(middleware.settings.TEMPLATE_DIRS, self.override_dirs)
+        self.assertEqual(
+            middleware.settings.TEMPLATE_DIRS, self.override_template_dirs
+        )
+        self.assertEqual(
+            middleware.settings.STATIC_DIRS, self.override_static_dirs
+        )
 
     def test_empty_cached_override_value(self):
         """Test that we deal with cached empty values."""
@@ -61,7 +69,12 @@ class MiddlewareTest(mimic.MimicTestBase):
 
         self.mw.process_request(fake_request)
 
-        self.assertEqual(middleware.settings.TEMPLATE_DIRS, self.override_dirs)
+        self.assertEqual(
+            middleware.settings.TEMPLATE_DIRS, self.override_template_dirs
+        )
+        self.assertEqual(
+            middleware.settings.STATIC_DIRS, self.override_static_dirs
+        )
 
     def test_single_override_value_cached(self):
         """Test that an override is picked up and put at top of list."""
@@ -73,7 +86,8 @@ class MiddlewareTest(mimic.MimicTestBase):
                 'priority': 1
             },
         ]
-        expected = ('/override_template', './templates')
+        expected_templates = ('/override_template', './templates')
+        expected_static = ('/override_static', './static')
         # Setup fake request, and make sure there is a cached value.
         fake_request = utils.FakeRequest()
         cache.set(
@@ -83,7 +97,8 @@ class MiddlewareTest(mimic.MimicTestBase):
         )
 
         self.mw.process_request(fake_request)
-        self.assertEqual(middleware.settings.TEMPLATE_DIRS, expected)
+        self.assertEqual(middleware.settings.TEMPLATE_DIRS, expected_templates)
+        self.assertEqual(middleware.settings.STATIC_DIRS, expected_static)
 
     def test_single_override_value(self):
         """Test that an override is picked up from the database."""
@@ -111,11 +126,17 @@ class MiddlewareTest(mimic.MimicTestBase):
 
     def test_multiple_override_values_cached(self):
         """Test that multiple overrides are applied in the correct order."""
-        expected = (
+        expected_templates = (
             '/top_override_template',
             '/secondary_override_template',
             '/tertiary_override_template',
             './templates'
+        )
+        expected_static = (
+            '/top_override_static',
+            '/secondary_override_static',
+            '/tertiary_override_static',
+            './static'
         )
 
         fake_overrides = [
@@ -150,16 +171,23 @@ class MiddlewareTest(mimic.MimicTestBase):
 
         self.mw.process_request(fake_request)
 
-        self.assertEqual(middleware.settings.TEMPLATE_DIRS, expected)
+        self.assertEqual(middleware.settings.TEMPLATE_DIRS, expected_templates)
+        self.assertEqual(middleware.settings.STATIC_DIRS, expected_static)
 
 
     def test_multiple_override_values(self):
         """multiple overrides are applied in the correct order from db."""
-        expected = (
+        expected_templates = (
             '/top_override_template',
             '/secondary_override_template',
             '/tertiary_override_template',
             './templates'
+        )
+        expected_static = (
+            '/top_override_static',
+            '/secondary_override_static',
+            '/tertiary_override_static',
+            './static'
         )
 
         fake_override_model1 = utils.FakeOverrideModel(
@@ -200,13 +228,13 @@ class MiddlewareTest(mimic.MimicTestBase):
 
         self.mw.process_request(fake_request)
 
-        self.assertEqual(middleware.settings.TEMPLATE_DIRS, expected)
+        self.assertEqual(middleware.settings.TEMPLATE_DIRS, expected_templates)
+        self.assertEqual(middleware.settings.STATIC_DIRS, expected_static)
 
     def test_override_urlconf(self):
         """Test success case for overriding a request's urlconf."""
-        view_url = '/view1'
         middleware.settings = utils.fake_settings(
-            TEMPLATE_DIRS=self.override_dirs,
+            TEMPLATE_DIRS=self.override_template_dirs,
             PROJECT_PATH='.',
             FINIAL_URL_OVERRIDES='finial.tests.finial_test_overrides',
             ROOT_URLCONF='test_settings'
@@ -222,6 +250,50 @@ class MiddlewareTest(mimic.MimicTestBase):
         test_urlconf = mid_inst.override_urlconf(fake_request, overrides)
 
         self.assertEqual(len(test_urlconf), 2)
-        self.assertEqual(test_urlconf[0].resolve(view_url).func, 'override_view')
-        self.assertEqual(test_urlconf[1].resolve(view_url).func, 'default_fake_view')
+        self.assertEqual(
+            test_urlconf[0].resolve(self.view_url).func,
+            'override_view'
+        )
+        self.assertEqual(
+            test_urlconf[1].resolve(self.view_url).func,
+            'default_fake_view'
+        )
 
+    def test_override_urlconf_asymmetric_rules(self):
+        """Does override_urlconf deal with more overrides than url rules?"""
+        middleware.settings = utils.fake_settings(
+            TEMPLATE_DIRS=self.override_template_dirs,
+            PROJECT_PATH='.',
+            FINIAL_URL_OVERRIDES='finial.tests.finial_test_overrides',
+            ROOT_URLCONF='test_settings'
+        )
+        fake_request = utils.FakeRequest()
+        # Here we make the override for which there is no override_url defined
+        # first, with highest priority.
+        overrides = [
+            {
+                'pk': 2,
+                'override_name': 'not_included_in_urlconf',
+                'override_dir': '/not_in_urlconf',
+                'priority': 1,
+
+            },
+            {
+                'pk': 1,
+                'override_name': 'override',
+                'override_dir': '/override',
+                'priority': 2,
+            },
+        ]
+        mid_inst = middleware.TemplateOverrideMiddleware()
+        test_urlconf = mid_inst.override_urlconf(fake_request, overrides)
+
+        self.assertEqual(len(test_urlconf), 2)
+        self.assertEqual(
+            test_urlconf[0].resolve(self.view_url).func,
+            'override_view'
+        )
+        self.assertEqual(
+            test_urlconf[1].resolve(self.view_url).func,
+            'default_fake_view'
+        )

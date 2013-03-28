@@ -10,6 +10,9 @@ from finial import models
 DEFAULT_TEMPLATE_DIRS = (
     settings.PROJECT_PATH + '/templates',
 )
+DEFAULT_STATIC_DIRS = (
+    settings.PROJECT_PATH + '/static',
+)
 
 
 def get_module_by_path(path):
@@ -68,16 +71,30 @@ class TemplateOverrideMiddleware(object):
 
         return request.urlconf
 
-    def override_template_dirs(self, overrides):
+    def override_settings_dirs(self, overrides):
         """Give overrides priority in settings.TEMPLATE_DIRS."""
-        override_dirs= [
-            override['override_dir'] for override in overrides
-        ]
-        # Add in the default TEMPLATE_DIR at the end
-        override_dirs.append(DEFAULT_TEMPLATE_DIRS[0])
+        for override_type in ('template', 'static'):
+            override_dirs= [
+                '{0}_{1}'.format(
+                    override['override_dir'],
+                    override_type
+                ) for override in overrides
+            ]
+            override_dirs.extend(getattr(
+                settings,
+                '{0}_DIRS'.format(override_type.upper()),
+                []
+            ))
 
-        # Temporarily set our global settings' TEMPLATE_DIRS var.
-        settings.TEMPLATE_DIRS = tuple(override_dirs)
+            if not override_dirs:
+                continue
+
+            # Set {TEMPLATE_DIRS, STATIC_DIRS} with override values.
+            setattr(
+                settings,
+                '{0}_DIRS'.format(override_type.upper()),
+                tuple(override_dirs)
+            )
 
     def process_request(self, request):
         """See if there are any overrides, apply them to TEMPLATE_DIRS.
@@ -104,7 +121,7 @@ class TemplateOverrideMiddleware(object):
         if override_values:
             # Reset URLConf for specific views
             self.override_urlconf(request, override_values)
-            self.override_template_dirs(override_values)
+            self.override_settings_dirs(override_values)
 
             # Cache whatever we've found in the database.
             cache.set(

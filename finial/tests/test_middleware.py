@@ -25,7 +25,7 @@ class MiddlewareTest(mimic.MimicTestBase):
         self.override_static_dirs= ('./static',)
         self.settings = utils.fake_settings(
             TEMPLATE_DIRS=self.override_template_dirs,
-            STATIC_DIRS=self.override_static_dirs,
+            STATICFILES_DIRS=self.override_static_dirs,
             PROJECT_PATH='.'
         )
         middleware.settings = self.settings
@@ -54,7 +54,7 @@ class MiddlewareTest(mimic.MimicTestBase):
             middleware.settings.TEMPLATE_DIRS, self.override_template_dirs
         )
         self.assertEqual(
-            middleware.settings.STATIC_DIRS, self.override_static_dirs
+            middleware.settings.STATICFILES_DIRS, self.override_static_dirs
         )
 
     def test_empty_cached_override_value(self):
@@ -73,7 +73,7 @@ class MiddlewareTest(mimic.MimicTestBase):
             middleware.settings.TEMPLATE_DIRS, self.override_template_dirs
         )
         self.assertEqual(
-            middleware.settings.STATIC_DIRS, self.override_static_dirs
+            middleware.settings.STATICFILES_DIRS, self.override_static_dirs
         )
 
     def test_single_override_value_cached(self):
@@ -87,7 +87,7 @@ class MiddlewareTest(mimic.MimicTestBase):
             },
         ]
         expected_templates = ('/override_template', './templates')
-        expected_static = ('/override_static', './static')
+        expected_static = ('/override_staticfiles', './static')
         # Setup fake request, and make sure there is a cached value.
         fake_request = utils.FakeRequest()
         cache.set(
@@ -98,7 +98,7 @@ class MiddlewareTest(mimic.MimicTestBase):
 
         self.mw.process_request(fake_request)
         self.assertEqual(middleware.settings.TEMPLATE_DIRS, expected_templates)
-        self.assertEqual(middleware.settings.STATIC_DIRS, expected_static)
+        self.assertEqual(middleware.settings.STATICFILES_DIRS, expected_static)
 
     def test_single_override_value(self):
         """Test that an override is picked up from the database."""
@@ -133,9 +133,9 @@ class MiddlewareTest(mimic.MimicTestBase):
             './templates'
         )
         expected_static = (
-            '/top_override_static',
-            '/secondary_override_static',
-            '/tertiary_override_static',
+            '/top_override_staticfiles',
+            '/secondary_override_staticfiles',
+            '/tertiary_override_staticfiles',
             './static'
         )
 
@@ -172,7 +172,7 @@ class MiddlewareTest(mimic.MimicTestBase):
         self.mw.process_request(fake_request)
 
         self.assertEqual(middleware.settings.TEMPLATE_DIRS, expected_templates)
-        self.assertEqual(middleware.settings.STATIC_DIRS, expected_static)
+        self.assertEqual(middleware.settings.STATICFILES_DIRS, expected_static)
 
 
     def test_multiple_override_values(self):
@@ -184,9 +184,9 @@ class MiddlewareTest(mimic.MimicTestBase):
             './templates'
         )
         expected_static = (
-            '/top_override_static',
-            '/secondary_override_static',
-            '/tertiary_override_static',
+            '/top_override_staticfiles',
+            '/secondary_override_staticfiles',
+            '/tertiary_override_staticfiles',
             './static'
         )
 
@@ -229,7 +229,7 @@ class MiddlewareTest(mimic.MimicTestBase):
         self.mw.process_request(fake_request)
 
         self.assertEqual(middleware.settings.TEMPLATE_DIRS, expected_templates)
-        self.assertEqual(middleware.settings.STATIC_DIRS, expected_static)
+        self.assertEqual(middleware.settings.STATICFILES_DIRS, expected_static)
 
     def test_override_urlconf(self):
         """Test success case for overriding a request's urlconf."""

@@ -73,7 +73,7 @@ class TemplateOverrideMiddleware(object):
 
     def override_settings_dirs(self, overrides):
         """Give overrides priority in settings.TEMPLATE_DIRS."""
-        for override_type in ('template', 'static'):
+        for override_type in ('template', 'staticfiles'):
             override_dirs= [
                 '{0}_{1}'.format(
                     override['override_dir'],

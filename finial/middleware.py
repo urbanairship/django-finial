@@ -101,7 +101,7 @@ class TemplateOverrideMiddleware(object):
                 tuple(override_dirs)
             )
 
-    def process_request(self, request):
+    def process_request(self, request, response):
         """See if there are any overrides, apply them to TEMPLATE_DIRS.
 
         :param request: a django HttpRequest instance.
@@ -139,7 +139,3 @@ class TemplateOverrideMiddleware(object):
             cache.set(self.get_tmpl_override_cache_key(request.user),'[]', 600)
 
         return None
-
-    def process_response(self, request):
-        # Maybe we don't need to do anything here?
-        pass

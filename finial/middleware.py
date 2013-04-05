@@ -89,6 +89,11 @@ class TemplateOverrideMiddleware(object):
             if not override_dirs:
                 continue
 
+            if override_type == 'staticfiles':
+                # Because staticfiles uses the 'last' instance found,
+                # *not* the first as templates do.
+                override_dirs.reverse()
+
             # Set {TEMPLATE_DIRS, STATIC_DIRS} with override values.
             setattr(
                 settings,

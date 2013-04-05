@@ -6,7 +6,7 @@ setup(
     name='django-finial',
     version='.'.join(map(str, VERSION)),
     description='Template, Static, and URL Overrides per User.',
-    long_description=open('README.rst').read(),
+    long_description=open('README.md').read(),
     author='Gavin McQuillan',
     author_email='gavin@urbanairship.com',
     url='http://github.com/urbanairship/django-finial',

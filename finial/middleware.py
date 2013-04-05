@@ -101,7 +101,7 @@ class TemplateOverrideMiddleware(object):
                 tuple(override_dirs)
             )
 
-    def process_request(self, request, response):
+    def process_request(self, request):
         """See if there are any overrides, apply them to TEMPLATE_DIRS.
 
         :param request: a django HttpRequest instance.

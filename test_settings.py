@@ -19,6 +19,10 @@ INSTALLED_APPS = (
     'finial',
 )
 
+
+TEMPLATE_DIRS = ('./templates',)
+STATICFILES_DIRS = ('./static',)
+
 # point to ourselves as the root urlconf, define no patterns (see below)
 ROOT_URLCONF = 'test_settings'
 

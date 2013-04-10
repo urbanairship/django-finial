@@ -297,3 +297,33 @@ class MiddlewareTest(mimic.MimicTestBase):
             test_urlconf[1].resolve(self.view_url).func,
             'default_fake_view'
         )
+
+    def test_unauthenticated_user_is_skipped(self):
+        """Make sure we don't do any lookups for unauth'ed users."""
+        template_dirs = ('./templates',)
+        staticfiles_dirs = ('./static',)
+        middleware.settings = utils.fake_settings(
+            TEMPLATE_DIRS=template_dirs,
+            STATICFILES_DIRS=staticfiles_dirs,
+            PROJECT_PATH='.',
+        )
+
+        fake_request = utils.FakeRequest()
+        fake_request.user = utils.fake_user(is_authenticated=lambda self: False)
+
+        self.assertFalse(fake_request.user.is_authenticated())
+
+        mid_inst = middleware.TemplateOverrideMiddleware()
+
+        mid_inst.process_request(fake_request)
+
+        # Assert that nothing has changed, our unauthenticated user is a
+        # noop.
+        self.assertEqual(
+            middleware.settings.TEMPLATE_DIRS, template_dirs
+        )
+
+        self.assertEqual(
+            middleware.settings.STATICFILES_DIRS, staticfiles_dirs
+        )
+

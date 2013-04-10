@@ -5,7 +5,6 @@ def fake_settings(**kwargs):
 def fake_user(**kwargs):
     return type('FakeUser', (object,), kwargs)()
 
-
 class FakeRequest(object):
     """A simple request stub."""
     def __init__(self, *args, **kwargs):
@@ -14,7 +13,8 @@ class FakeRequest(object):
         self.user = fake_user(
             pk=kwargs.get('user_pk', 1),
             username=kwargs.get('user_username', 'tester'),
-            email=kwargs.get('user_email', 'tester@example.com')
+            email=kwargs.get('user_email', 'tester@example.com'),
+            is_authenticated=lambda self: True
         )
 
 class FakeOverrideModel(object):

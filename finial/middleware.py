@@ -7,12 +7,10 @@ from django.forms.models import model_to_dict
 
 from finial import models
 
-DEFAULT_TEMPLATE_DIRS = (
-    settings.PROJECT_PATH + '/templates',
-)
-DEFAULT_STATIC_DIRS = (
-    settings.PROJECT_PATH + '/static',
-)
+# Cache the original values from settings here for resetting per
+# request.
+DEFAULT_TEMPLATE_DIRS = settings.TEMPLATE_DIRS
+DEFAULT_STATICFILES_DIRS = settings.STATICFILES_DIRS
 
 
 def get_module_by_path(path):
@@ -111,6 +109,13 @@ class TemplateOverrideMiddleware(object):
 
         """
         settings.TEMPLATE_DIRS = DEFAULT_TEMPLATE_DIRS
+        settings.STATICFILES_DIRS = DEFAULT_STATICFILES_DIRS
+        # We check for authentication after we reset settings.TEMPLATE_DIRS
+        # This we we don't get any contamination
+        if not request.user.is_authenticated():
+            # We can only reason about authenticated user sessions.
+            return None
+
         override_values = cache.get(self.get_tmpl_override_cache_key(request.user))
         overrides = None
         if override_values is not None:

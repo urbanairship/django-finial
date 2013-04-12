@@ -13,13 +13,6 @@ DEFAULT_TEMPLATE_DIRS = settings.TEMPLATE_DIRS
 DEFAULT_STATICFILES_DIRS = settings.STATICFILES_DIRS
 
 
-def get_module_by_path(path):
-    mod = __import__(path)
-    for sub in path.split('.')[1:]:
-        mod = getattr(mod, sub)
-    return mod
-
-
 class TemplateOverrideMiddleware(object):
     """Override templates on a per-user basis; modify TEMPLATE_DIRS.
 
@@ -42,32 +35,15 @@ class TemplateOverrideMiddleware(object):
         .. note:: this function also modifies request.urlconf!
 
         """
-        url_override_cls = getattr(settings, 'FINIAL_URL_OVERRIDES', None)
-        if not url_override_cls:
-            return
+        url_overrides = getattr(settings, 'FINIAL_URL_OVERRIDES', None)
+        if url_overrides:
+            for override in overrides:
+                if override['override_name'] in url_overrides:
+                    # return the override url_conf with the
+                    # highest priority for this user.
+                    request.urlconf =  url_overrides[override['override_name']]
+                    return request.urlconf
 
-        url_override_inst = get_module_by_path(url_override_cls)
-        args = []
-        # These should be in priority order, higher priority at the top.
-        for override in overrides:
-            url_pattern = url_override_inst.override_urlpatterns.get(
-                override['override_name']
-            )
-            if not url_pattern:
-                continue
-
-            args.append(url(
-                r'^', include(url_pattern, namespace=override['override_name'])
-            ))
-
-        # At the very end, we should include the original ROOT_URLCONF
-        args.append(url(r'^', include(getattr(
-            get_module_by_path(settings.ROOT_URLCONF), 'urlpatterns'
-        ))))
-
-        request.urlconf = patterns('', *args)
-
-        return request.urlconf
 
     def override_settings_dirs(self, overrides):
         """Give overrides priority in settings.TEMPLATE_DIRS."""

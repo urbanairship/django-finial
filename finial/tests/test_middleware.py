@@ -236,7 +236,7 @@ class MiddlewareTest(mimic.MimicTestBase):
         middleware.settings = utils.fake_settings(
             TEMPLATE_DIRS=self.override_template_dirs,
             PROJECT_PATH='.',
-            FINIAL_URL_OVERRIDES='finial.tests.finial_test_overrides',
+            FINIAL_URL_OVERRIDES={'override': 'finial.tests.finial_test_overrides'},
             ROOT_URLCONF='test_settings'
         )
         fake_request = utils.FakeRequest()
@@ -249,22 +249,16 @@ class MiddlewareTest(mimic.MimicTestBase):
         mid_inst = middleware.TemplateOverrideMiddleware()
         test_urlconf = mid_inst.override_urlconf(fake_request, overrides)
 
-        self.assertEqual(len(test_urlconf), 2)
-        self.assertEqual(
-            test_urlconf[0].resolve(self.view_url).func,
-            'override_view'
-        )
-        self.assertEqual(
-            test_urlconf[1].resolve(self.view_url).func,
-            'default_fake_view'
-        )
+        expected = 'finial.tests.finial_test_overrides'
+
+        self.assertEqual(test_urlconf, expected)
 
     def test_override_urlconf_asymmetric_rules(self):
         """Does override_urlconf deal with more overrides than url rules?"""
         middleware.settings = utils.fake_settings(
             TEMPLATE_DIRS=self.override_template_dirs,
             PROJECT_PATH='.',
-            FINIAL_URL_OVERRIDES='finial.tests.finial_test_overrides',
+            FINIAL_URL_OVERRIDES={'override':'finial.tests.finial_test_overrides'},
             ROOT_URLCONF='test_settings'
         )
         fake_request = utils.FakeRequest()
@@ -288,15 +282,13 @@ class MiddlewareTest(mimic.MimicTestBase):
         mid_inst = middleware.TemplateOverrideMiddleware()
         test_urlconf = mid_inst.override_urlconf(fake_request, overrides)
 
-        self.assertEqual(len(test_urlconf), 2)
-        self.assertEqual(
-            test_urlconf[0].resolve(self.view_url).func,
-            'override_view'
-        )
-        self.assertEqual(
-            test_urlconf[1].resolve(self.view_url).func,
-            'default_fake_view'
-        )
+        expected = 'finial.tests.finial_test_overrides'
+
+        # Even though the "first" override doesn't have a URLconf entry
+        # We still find one because we try all the overrides for a user
+        # until we get the first one that does have a URconf override.
+        self.assertEqual(test_urlconf, expected)
+
 
     def test_unauthenticated_user_is_skipped(self):
         """Make sure we don't do any lookups for unauth'ed users."""

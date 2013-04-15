@@ -1,7 +1,6 @@
 import simplejson as json
 
 from django.conf import settings
-from django.conf.urls.defaults import include, patterns, url
 from django.core.cache import cache
 from django.forms.models import model_to_dict
 
@@ -44,13 +43,14 @@ class TemplateOverrideMiddleware(object):
                     request.urlconf =  url_overrides[override['override_name']]
                     return request.urlconf
 
-
     def override_settings_dirs(self, overrides):
         """Give overrides priority in settings.TEMPLATE_DIRS."""
+        # Assumes PROJECT_PATH refers to the root of the django project.
+        prefix = getattr(settings, 'PROJECT_PATH', '')
         for override_type in ('template', 'staticfiles'):
             override_dirs= [
                 '{0}_{1}'.format(
-                    override['override_dir'],
+                    prefix + override['override_dir'],
                     override_type
                 ) for override in overrides
             ]

@@ -86,8 +86,8 @@ class MiddlewareTest(mimic.MimicTestBase):
                 'priority': 1
             },
         ]
-        expected_templates = ('/override_template', './templates')
-        expected_static = ('./static', '/override_staticfiles')
+        expected_templates = ('./override_template', './templates')
+        expected_static = ('./static', './override_staticfiles')
         # Setup fake request, and make sure there is a cached value.
         fake_request = utils.FakeRequest()
         cache.set(
@@ -102,7 +102,7 @@ class MiddlewareTest(mimic.MimicTestBase):
 
     def test_single_override_value(self):
         """Test that an override is picked up from the database."""
-        expected = ('/override_template', './templates')
+        expected = ('./override_template', './templates')
         # Setting up mocks for model interactions.
         fake_override_model = utils.FakeOverrideModel()
         fake_override_qs = self.mimic.create_mock_anything()
@@ -127,16 +127,16 @@ class MiddlewareTest(mimic.MimicTestBase):
     def test_multiple_override_values_cached(self):
         """Test that multiple overrides are applied in the correct order."""
         expected_templates = (
-            '/top_override_template',
-            '/secondary_override_template',
-            '/tertiary_override_template',
+            './top_override_template',
+            './secondary_override_template',
+            './tertiary_override_template',
             './templates'
         )
         expected_static = (
             './static',
-            '/tertiary_override_staticfiles',
-            '/secondary_override_staticfiles',
-            '/top_override_staticfiles',
+            './tertiary_override_staticfiles',
+            './secondary_override_staticfiles',
+            './top_override_staticfiles',
         )
 
         fake_overrides = [
@@ -178,16 +178,16 @@ class MiddlewareTest(mimic.MimicTestBase):
     def test_multiple_override_values(self):
         """multiple overrides are applied in the correct order from db."""
         expected_templates = (
-            '/top_override_template',
-            '/secondary_override_template',
-            '/tertiary_override_template',
+            './top_override_template',
+            './secondary_override_template',
+            './tertiary_override_template',
             './templates'
         )
         expected_static = (
             './static',
-            '/tertiary_override_staticfiles',
-            '/secondary_override_staticfiles',
-            '/top_override_staticfiles',
+            './tertiary_override_staticfiles',
+            './secondary_override_staticfiles',
+            './top_override_staticfiles',
         )
 
         fake_override_model1 = utils.FakeOverrideModel(

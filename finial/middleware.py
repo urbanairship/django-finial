@@ -108,6 +108,8 @@ class TemplateOverrideMiddleware(object):
             # Reset URLConf for specific views
             self.override_urlconf(request, override_values)
             self.override_settings_dirs(override_values)
+            # staple the override_values dictionary to the request
+            request.finial_overrides = override_values
 
             # Cache whatever we've found in the database.
             cache.set(

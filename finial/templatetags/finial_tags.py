@@ -20,6 +20,7 @@ def get_media_url(parser, token):
     """For older generations of Django installs (Pre 1.3)."""
     return MediaURLNode()
 
+
 def get_static_url(parser, token):
     """If you're using the staticfiles app: use this.
 
@@ -28,6 +29,7 @@ def get_static_url(parser, token):
 
     """
     return StaticURLNode()
+
 
 get_media_url = register.tag(get_media_url)
 get_static_url = register.tag(get_static_url)

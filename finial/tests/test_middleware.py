@@ -3,18 +3,9 @@ import json
 
 from django.core.cache import cache
 
-from finial.tests import utils
 from finial import middleware
 from finial import models
-
-
-def mock_model_to_dict(model):
-    return {
-        'pk': model.pk,
-        'override_name': model.override_name,
-        'override_dir': model.override_dir,
-        'priority': model.priority
-    }
+from finial.tests import utils
 
 
 class MiddlewareTest(mimic.MimicTestBase):
@@ -29,7 +20,7 @@ class MiddlewareTest(mimic.MimicTestBase):
             PROJECT_PATH='.'
         )
         middleware.settings = self.settings
-        middleware.model_to_dict = mock_model_to_dict
+        middleware.model_to_dict = utils.mock_model_to_dict
         self.mw = middleware.TemplateOverrideMiddleware()
         self.view_url = '/view1'
         cache.clear()

@@ -30,7 +30,8 @@ class TemplateContextProcessorTest(mimic.MimicTestBase):
             FINIAL_STATIC_URL_PREFIX='com.finial.media',
             FINIAL_URL_OVERRIDES={
                 'test_or':'finial.tests.finial_context_test_overrides'
-            }
+            },
+            DEBUG=False
         )
 
         context_processors.settings = fake_settings
@@ -45,8 +46,8 @@ class TemplateContextProcessorTest(mimic.MimicTestBase):
         }]
 
         expected_output = {
-            'STATIC_URL': 'com.finial.media.testing_override',
-            'MEDIA_URL': 'com.finial.media.testing_override'
+            'STATIC_URL': 'com.finial.media.testing_override/',
+            'MEDIA_URL': 'com.finial.media.testing_override/'
         }
         test_output = context_processors.asset_url(request)
 

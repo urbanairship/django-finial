@@ -5,7 +5,6 @@ def _build_url(prefix, override_name, delimiter='.'):
     """Deals with local vs. production url building."""
     if settings.DEBUG:
         delimiter = ''
-        override_name = ''
 
     return '{0}{1}{2}/'.format(prefix, delimiter, override_name.replace('/',''))
 

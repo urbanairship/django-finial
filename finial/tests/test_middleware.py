@@ -78,7 +78,7 @@ class MiddlewareTest(mimic.MimicTestBase):
             },
         ]
         expected_templates = ('./override_template', './templates')
-        expected_static = ('./static', './override_staticfiles')
+        expected_static = ('./override_staticfiles', './static')
         # Setup fake request, and make sure there is a cached value.
         fake_request = utils.FakeRequest()
         cache.set(
@@ -124,10 +124,10 @@ class MiddlewareTest(mimic.MimicTestBase):
             './templates'
         )
         expected_static = (
-            './static',
-            './tertiary_override_staticfiles',
-            './secondary_override_staticfiles',
             './top_override_staticfiles',
+            './secondary_override_staticfiles',
+            './tertiary_override_staticfiles',
+            './static',
         )
 
         fake_overrides = [
@@ -175,10 +175,10 @@ class MiddlewareTest(mimic.MimicTestBase):
             './templates'
         )
         expected_static = (
-            './static',
-            './tertiary_override_staticfiles',
-            './secondary_override_staticfiles',
             './top_override_staticfiles',
+            './secondary_override_staticfiles',
+            './tertiary_override_staticfiles',
+            './static',
         )
 
         fake_override_model1 = utils.FakeOverrideModel(

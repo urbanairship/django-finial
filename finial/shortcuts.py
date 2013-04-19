@@ -8,6 +8,7 @@ from django.conf.urls.defaults import patterns, url
 # we need all of the static assets to be served.
 # This code should *never* be run in production!!!!
 
+
 def create_local_override_urls(root_urlpatterns):
     """Create URL paths for static assets for overrides in development mode."""
     if not settings.DEBUG:
@@ -15,12 +16,16 @@ def create_local_override_urls(root_urlpatterns):
         return root_urlpatterns
 
     overrides = UserTemplateOverride.objects.all()
+    finial_local_dir_prefix = getattr(settings, 'FINIAL_LOCAL_DIR_PREFIX', '')
     for override in overrides:
         url_regex = r'^static/{0}/(?P<path>.*)$'.format(
             override.override_dir.replace('/', '')
         )
-        dir_path = '{0}{1}{2}'.format(
-            settings.PROJECT_PATH,  override.override_dir, '_staticfiles/'
+        dir_path = '{0}{1}{2}{3}'.format(
+            settings.PROJECT_PATH,
+            finial_local_dir_prefix,
+            override.override_dir,
+            '_staticfiles/'
         )
         root_urlpatterns += patterns('',
             url(url_regex, 'django.views.static.serve',{

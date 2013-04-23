@@ -24,5 +24,5 @@ if DEBUG:
 
 # Here is where we map override names to URLconf module paths:
 FINIAL_URL_OVERRIDES = {
-    'test_or': 'airship.finial_override_patterns'
+    'test_or': 'my_project.finial_override_patterns'
 }

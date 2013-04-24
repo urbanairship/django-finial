@@ -3,7 +3,7 @@ from finial.models import UserTemplateOverride
 from django.conf import settings
 from django.conf.urls.defaults import patterns, url
 
-# This is dangerious, we should be wary of using this as overrides grow.
+# This is dangerous, we should be wary of using this as overrides grow.
 # Since this gets loaded before settings get modified by middleware,
 # we need all of the static assets to be served.
 # This code should *never* be run in production!!!!

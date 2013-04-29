@@ -11,6 +11,11 @@ DEBUG = True
 
 FINIAL_LOCAL_DIR_PREFIX = '/overrides' # This is the directory prefix from your PROJECT_PATH
 FINIAL_MEDIA_URL_PREFIX = FINIAL_STATIC_URL_PREFIX = 'https://s3.amazonaws.com/com.finial.media'
+# This will get tacked on in the case that your static media are pegged
+# to a deployment version. It gets inserted directly before the
+# override_name. The complete url will look something like this:
+# https://s3.amazonaws.com/com.finial.media.deploy5-test-or/
+FINIAL_URL_VERSION_PREFIX = 'deploy5-'
 
 if DEBUG:
     FINIAL_MEDIA_URL_PREFIX = FINIAL_STATIC_URL_PREFIX = STATIC_URL

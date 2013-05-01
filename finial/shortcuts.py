@@ -16,7 +16,7 @@ def create_local_override_urls(root_urlpatterns):
         return root_urlpatterns
 
     overrides = UserTemplateOverride.objects.all()
-    finial_local_dir_prefix = getattr(settings, 'FINIAL_LOCAL_DIR_PREFIX', '')
+    finial_local_dir_prefix = getattr(settings, 'FINIAL_TEMPLATE_DIR_PREFIX', '')
     for override in overrides:
         url_regex = r'^static/{0}/(?P<path>.*)$'.format(
             override.override_dir.replace('/', '')

@@ -45,8 +45,8 @@ class TemplateContextProcessorTest(mimic.MimicTestBase):
             'priority': 1,
         }]
         expected_output = {
-            'STATIC_URL': 'com.finial.media.testing-override/',
-            'MEDIA_URL': 'com.finial.media.testing-override/'
+            'STATIC_URL': 'com.finial.media.testing_override/',
+            'MEDIA_URL': 'com.finial.media.testing_override/'
         }
         test_output = context_processors.asset_url(request)
 

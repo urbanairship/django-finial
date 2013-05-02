@@ -1,3 +1,5 @@
+# (c) 2013 Urban Airship and Contributors
+
 from finial.models import UserTemplateOverride
 
 from django.conf import settings

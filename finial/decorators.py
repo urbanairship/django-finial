@@ -1,3 +1,5 @@
+# (c) 2013 Urban Airship and Contributors
+
 from functools import wraps
 
 def active_override(override_name):

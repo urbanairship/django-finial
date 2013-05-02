@@ -1,3 +1,5 @@
+# (c) 2013 Urban Airship and Contributors
+
 from finial.decorators import active_override
 
 from django.conf.urls.defaults import url, patterns

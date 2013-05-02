@@ -1,3 +1,5 @@
+# (c) 2013 Urban Airship and Contributors
+
 """ This is an example local_settings.py file meant for local development."""
 
 

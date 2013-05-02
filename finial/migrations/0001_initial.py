@@ -1,3 +1,5 @@
+# (c) 2013 Urban Airship and Contributors
+
 # -*- coding: utf-8 -*-
 import datetime
 from south.db import db

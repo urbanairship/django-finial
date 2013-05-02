@@ -1,3 +1,5 @@
+# (c) 2013 Urban Airship and Contributors
+
 import mimic
 
 from finial import context_processors

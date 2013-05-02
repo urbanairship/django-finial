@@ -1,3 +1,5 @@
+# (c) 2013 Urban Airship and Contributors
+
 from setuptools import setup, find_packages
 
 from finial import VERSION

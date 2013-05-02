@@ -65,7 +65,7 @@ to have an override-prefix for finial to use to find your tempalte directories.
 Put this in your ```settings.py``` to have finial look in ```/path/to/django/overrides/<override_name>_templates/```
 
 ```python
-FINIAL_LOCAL_DIR_PREFIX = '/overrides' # This is the directory prefix from your PROJECT_PATH
+FINIAL_TEMPLATE_DIR_PREFIX = '/overrides' # This is the directory prefix from your PROJECT_PATH
 ```
 See ```example_settings.py``` for other common settings
 
@@ -156,7 +156,7 @@ DEBUG=True
 PROJECT_PATH = '/path/to/django/root/'
 FINIAL_URL_VERSION_PREFIX = 'deploy5-'
 FINIAL_STATIC_URL_PREFIX = 'https://s3.amazonaws.com/com.finial.media'
-FINIAL_LOCAL_DIR_PREFIX = '/overrides'
+FINIAL_TEMPLATE_DIR_PREFIX = '/overrides'
 STATICFILES_FINDERS = (
     'finial.finders.FinialFileSystemFinder',
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -165,7 +165,7 @@ STATICFILES_FINDERS = (
 ```
 
 _Note_: If we want to not require all of our overrides directories to live in our project root, we need to specify
-a ```FINIAL_LOCAL_DIR_PREFIX``` which is applied after the ```PROJECT_PATH``` variable. The 'root' override directory
+a ```FINIAL_TEMPLATE_DIR_PREFIX``` which is applied after the ```PROJECT_PATH``` variable. The 'root' override directory
 from the example above would be ```/path/to/django/root/overrides/```.
 
 

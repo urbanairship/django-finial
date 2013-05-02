@@ -9,7 +9,7 @@ STATICFILES_DIRS = (
 
 DEBUG = True
 
-FINIAL_LOCAL_DIR_PREFIX = '/overrides' # This is the directory prefix from your PROJECT_PATH
+FINIAL_TEMPLATE_DIR_PREFIX = '/overrides' # This is the directory prefix from your PROJECT_PATH
 FINIAL_MEDIA_URL_PREFIX = FINIAL_STATIC_URL_PREFIX = 'https://s3.amazonaws.com/com.finial.media'
 # This will get tacked on in the case that your static media are pegged
 # to a deployment version. It gets inserted directly before the

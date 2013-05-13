@@ -47,6 +47,10 @@ class TemplateOverrideMiddleware(object):
         """Give overrides priority in settings.TEMPLATE_DIRS."""
         # Assumes PROJECT_PATH refers to the root of the django project.
         prefix = getattr(settings, 'PROJECT_PATH', '')
+        override_prefix = getattr(settings, 'FINIAL_TEMPLATE_DIR_PREFIX', '')
+        if prefix and override_prefix:
+            prefix = '{0}/{1}'.format(prefix, override_prefix)
+
         for override_type in ('template', 'staticfiles'):
             override_dirs= [
                 '{0}_{1}'.format(

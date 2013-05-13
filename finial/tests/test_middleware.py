@@ -17,7 +17,7 @@ class MiddlewareTest(mimic.MimicTestBase):
         self.settings = utils.fake_settings(
             TEMPLATE_DIRS=self.override_template_dirs,
             STATICFILES_DIRS=self.override_static_dirs,
-            PROJECT_PATH='.'
+            PROJECT_PATH='.',
         )
         middleware.settings = self.settings
         middleware.model_to_dict = utils.mock_model_to_dict

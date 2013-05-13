@@ -30,6 +30,13 @@ class UserTemplateOverride(models.Model):
     override_dir = models.CharField(max_length=255)
     priority = models.PositiveSmallIntegerField(default=1)
 
+    def __unicode__(self):
+        return u'{0}; User: {1}; Priority: {2}'.format(
+            self.override_name,
+            self.user,
+            self.priority
+        )
+
 
 models.signals.post_save.connect(
     signals.update_user_override_cache,

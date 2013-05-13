@@ -1,3 +1,5 @@
+# (c) 2013 Urban Airship and Contributors
+
 import simplejson as json
 
 from django.core.cache import cache

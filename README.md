@@ -197,3 +197,52 @@ Since templates and staticfiles are so totally different, we keep them in separa
 
 4 directories, 4 files
 ```
+
+Creating/Assigning Overrides
+----------------------------
+
+Basically, each row in the overrides table defines four things:
+
+- Who
+- Name of the overrides (used in things like urlconf keynames, etc.)
+- Directory path of the overrides (may be used in conjunction with `FINIAL_TEMPLATE_DIR_PREFIX`).
+- Priority (how should this override be rated vs. others?)
+
+**Creating an Override**
+
+This is mostly filesystem stuff and some configs. If you've completed the settings assignments above, then
+we're one step closer.
+
+Taking our ``FINIAL_TEMPLATE_DIR_PREFIX`` into account, we can create a structure like this:
+
+```bash
+mdkir $PROJECT_ROOT/overrides/test_override_template
+```
+
+Now you can copy the specific templates over that you'd like to change. These should be picked up before 
+"regular" templates for those users who have the override.
+
+**Assigning the Override to a User**
+
+Inside your ``manage.py shell``:
+
+```python
+
+>>> from finial import models
+>>> from django.contrib.auth.models import User
+>>> me = User.objects.get(username='gavin') # whichever username here.
+>>> my_override = models.UserTemplateOverride()
+>>> my_override.user = me
+>>> my_override.priority = 10 # In case there are more overrides later
+>>> # These two are always the same in our system; we may do away with one someday...
+>>> my_override.override_name = 'test_override'
+>>> my_override.override_dir = 'test_override'
+>>> my_override.save()
+```
+
+Now login as this user, ``gavin`` in this case, and see if the templates loaded for this user are different
+as you expect.
+
+
+
+

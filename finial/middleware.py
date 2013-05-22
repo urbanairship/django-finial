@@ -7,6 +7,7 @@ from django.core.cache import cache
 from django.forms.models import model_to_dict
 
 from finial import models
+from finial import util
 
 # Cache the original values from settings here for resetting per
 # request.
@@ -22,10 +23,6 @@ class TemplateOverrideMiddleware(object):
     Middlwares.
 
     """
-    @staticmethod
-    def get_tmpl_override_cache_key(user):
-        return 'tmpl_override:user_id:{0}'.format(user.pk)
-
     def override_urlconf(self, request, overrides):
         """If there are overrides, we make a custom urlconf.
 
@@ -93,7 +90,7 @@ class TemplateOverrideMiddleware(object):
             # We can only reason about authenticated user sessions.
             return None
 
-        override_values = cache.get(self.get_tmpl_override_cache_key(request.user))
+        override_values = cache.get(util.get_tmpl_override_cache_key(request.user))
         overrides = None
         if override_values is not None:
             # If we have *something* set, even an empty list
@@ -114,12 +111,12 @@ class TemplateOverrideMiddleware(object):
 
             # Cache whatever we've found in the database.
             cache.set(
-                self.get_tmpl_override_cache_key(request.user),
+                util.get_tmpl_override_cache_key(request.user),
                 json.dumps(override_values),
                 600
             )
         else:
             # Cache the negative presence of overrides.
-            cache.set(self.get_tmpl_override_cache_key(request.user),'[]', 600)
+            cache.set(util.get_tmpl_override_cache_key(request.user),'[]', 600)
 
         return None

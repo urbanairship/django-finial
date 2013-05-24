@@ -1,6 +1,10 @@
 # (c) 2013 Urban Airship and Contributors
+import json
 
 from django.conf import settings
+from django.core.cache import cache
+
+from finial import middleware
 
 
 def _build_url(prefix, override_name, delimiter='.'):
@@ -57,3 +61,25 @@ def asset_url(request):
         'MEDIA_URL': media_url,
         'STATIC_URL': static_url,
     }
+
+def override_names(request):
+    """Return a list of override names for javascript to discover.
+
+    Sets the template variable 'OVERRIDE_POINTS' to a json list
+    of the names of your overrides.
+
+    """
+    if not getattr(request, 'user'):
+        return {}
+
+    # Cache should be primed by middleware already.
+    cached_values = cache.get(
+        middleware.get_tmpl_override_cache_key(request.user)
+    )
+
+    if cached_values:
+        return { 'OVERRIDE_POINTS': json.dumps(
+            [override['name'] for override in cached_values]
+        )}
+
+    return {}

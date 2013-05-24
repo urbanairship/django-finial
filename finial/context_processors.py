@@ -78,7 +78,7 @@ def override_names(request):
     )
 
     if cached_values:
-        return { 'OVERRIDE_POINTS': json.dumps(
+        return { 'FINIAL_POINTS': json.dumps(
             [override['name'] for override in cached_values]
         )}
 

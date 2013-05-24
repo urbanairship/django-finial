@@ -1,9 +1,13 @@
 # (c) 2013 Urban Airship and Contributors
 
-import mimic
+import importlib
 import json
+import types
+
+import mimic
 
 from django.core.cache import cache
+from django.conf.urls.defaults import include, patterns, url
 
 from finial import middleware
 from finial import models
@@ -224,12 +228,24 @@ class MiddlewareTest(mimic.MimicTestBase):
         self.assertEqual(middleware.settings.TEMPLATE_DIRS, expected_templates)
         self.assertEqual(middleware.settings.STATICFILES_DIRS, expected_static)
 
+    def _import_fake_urlconf(self, path):
+        urlconf_mod = types.ModuleType('UnittestingUrlConf', 'For testing.')
+        urlconf_mod.urlpatterns = patterns(
+            '', url('', path, name='{0}_name'.format(path))
+        )
+
+        return urlconf_mod
+
     def test_override_urlconf(self):
         """Test success case for overriding a request's urlconf."""
+        paths = ['path.number1', 'path.number2']
         middleware.settings = utils.fake_settings(
             TEMPLATE_DIRS=self.override_template_dirs,
             PROJECT_PATH='.',
-            FINIAL_URL_OVERRIDES={'override': 'finial.tests.finial_test_overrides'},
+            FINIAL_URL_OVERRIDES={
+                'override': paths[0],
+                'override2': paths[1]
+            },
             ROOT_URLCONF='test_settings'
         )
         fake_request = utils.FakeRequest()
@@ -238,50 +254,48 @@ class MiddlewareTest(mimic.MimicTestBase):
             'override_name': 'override',
             'override_dir': '/override',
             'priority': 1,
+        },
+        {
+            'pk': 2,
+            'override_name': 'override2',
+            'override_dir': '/override2',
+            'priority': 2,
         }]
+
+        self.mimic.stub_out_with_mock(importlib, 'import_module')
+
+        for path in paths:
+            importlib.import_module(path).and_return(
+                self._import_fake_urlconf(path)
+            )
+
+        self.mimic.replay_all()
+
         mid_inst = middleware.TemplateOverrideMiddleware()
         test_urlconf = mid_inst.override_urlconf(fake_request, overrides)
 
-        expected = 'finial.tests.finial_test_overrides'
-
-        self.assertEqual(test_urlconf, expected)
-
-    def test_override_urlconf_asymmetric_rules(self):
-        """Does override_urlconf deal with more overrides than url rules?"""
-        middleware.settings = utils.fake_settings(
-            TEMPLATE_DIRS=self.override_template_dirs,
-            PROJECT_PATH='.',
-            FINIAL_URL_OVERRIDES={'override':'finial.tests.finial_test_overrides'},
-            ROOT_URLCONF='test_settings'
+        expected = patterns(
+            '',
+            url('', paths[0], name='{0}_name'.format(paths[0])),
+            url('', paths[1], name='{0}_name'.format(paths[1])),
+            url('', include('test_settings'))
         )
-        fake_request = utils.FakeRequest()
-        # Here we make the override for which there is no override_url defined
-        # first, with highest priority.
-        overrides = [
-            {
-                'pk': 2,
-                'override_name': 'not_included_in_urlconf',
-                'override_dir': '/not_in_urlconf',
-                'priority': 1,
 
-            },
-            {
-                'pk': 1,
-                'override_name': 'override',
-                'override_dir': '/override',
-                'priority': 2,
-            },
-        ]
-        mid_inst = middleware.TemplateOverrideMiddleware()
-        test_urlconf = mid_inst.override_urlconf(fake_request, overrides)
 
-        expected = 'finial.tests.finial_test_overrides'
+        self.assertEqual(len(test_urlconf.urlpatterns), len(expected))
+        for i in range(len(test_urlconf.urlpatterns) -1):
+            self.assertEqual(
+                test_urlconf.urlpatterns[i].name, expected[i].name
+            )
+            self.assertEqual(
+                test_urlconf.urlpatterns[i].regex.pattern,
+                expected[i].regex.pattern
+            )
 
-        # Even though the "first" override doesn't have a URLconf entry
-        # We still find one because we try all the overrides for a user
-        # until we get the first one that does have a URconf override.
-        self.assertEqual(test_urlconf, expected)
-
+        self.assertEqual(
+            test_urlconf.urlpatterns[-1].urlconf_name,
+            expected[-1].urlconf_name
+        )
 
     def test_unauthenticated_user_is_skipped(self):
         """Make sure we don't do any lookups for unauth'ed users."""

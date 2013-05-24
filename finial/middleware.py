@@ -15,7 +15,6 @@ from finial import models
 # request.
 DEFAULT_TEMPLATE_DIRS = settings.TEMPLATE_DIRS
 DEFAULT_STATICFILES_DIRS = settings.STATICFILES_DIRS
-URL_INCLUDE_TMPL = "url('', include('{0}')),"
 
 class TemplateOverrideMiddleware(object):
     """Override templates on a per-user basis; modify TEMPLATE_DIRS.

@@ -62,10 +62,11 @@ def asset_url(request):
         'STATIC_URL': static_url,
     }
 
+
 def override_names(request):
     """Return a list of override names for javascript to discover.
 
-    Sets the template variable 'OVERRIDE_POINTS' to a json list
+    Sets the template variable 'FINIAL_POINTS' to a json list
     of the names of your overrides.
 
     """
@@ -74,12 +75,16 @@ def override_names(request):
 
     # Cache should be primed by middleware already.
     cached_values = cache.get(
-        middleware.get_tmpl_override_cache_key(request.user)
+        middleware.TemplateOverrideMiddleware.get_tmpl_override_cache_key(
+            request.user
+        )
     )
 
     if cached_values:
+        override_dict = json.loads(cached_values)
+
         return { 'FINIAL_POINTS': json.dumps(
-            [override['name'] for override in cached_values]
+            [override['override_name'] for override in override_dict]
         )}
 
     return {}

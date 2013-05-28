@@ -47,7 +47,7 @@ def asset_url(request):
         return {}
 
     overrides = getattr(request, 'finial_overrides', {})
-    if not overrides:
+    if not overrides or not request.user.is_authenticated():
         return {}
 
     media_url = _build_url(
@@ -70,7 +70,7 @@ def override_names(request):
     of the names of your overrides.
 
     """
-    if not getattr(request, 'user'):
+    if not getattr(request, 'user') or not request.user.is_authenticated():
         return {}
 
     # Cache should be primed by middleware already.

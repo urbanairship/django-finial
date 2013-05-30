@@ -198,8 +198,37 @@ Since templates and staticfiles are so totally different, we keep them in separa
 4 directories, 4 files
 ```
 
+Or, alternatively, you can actually put your static media in a 'chroot' inside the test of your static media
+by defining the ``FINIAL_URL_PREFIX``:
+
+In settings.py:
+```python
+FINIAL_STATIC_URL = 'static/'
+FINIAL_URL_PREFIX = 'overrides/'
+```
+Then you could have a directory structure like so:
+```
+~/path/to/django/static$ tree
+static/
+└── overrides
+    └── test_or
+        └── apps
+            ├── configure-image.png
+            └── docs-image.png
+
+3 directories, 2 files
+```
+
+This is particularly nice because it enables us to differentiate between overrides on the same CDN.
+We don't need to deploy to separate S3 buckets for each override.
+
 Creating/Assigning Overrides
 ----------------------------
+**Simple Override Creation**
+The easy, straightforward way is to simply enter form fields using the Admin interface.
+This works great for adding singular individuals, or for getting a test override setup in
+your development environment.
+
 
 Basically, each row in the overrides table defines four things:
 
@@ -208,7 +237,7 @@ Basically, each row in the overrides table defines four things:
 - Directory path of the overrides (may be used in conjunction with `FINIAL_TEMPLATE_DIR_PREFIX`).
 - Priority (how should this override be rated vs. others?)
 
-**Creating an Override**
+**Programmatic Override Creation**
 
 This is mostly filesystem stuff and some configs. If you've completed the settings assignments above, then
 we're one step closer.
@@ -244,5 +273,66 @@ Now login as this user, ``gavin`` in this case, and see if the templates loaded 
 as you expect.
 
 
+Producing Results: Context Processors
+-------------------------------------
+
+There are two primary ways of surfacing the differences within template data to users. Both of these make use of
+Django's Context Processors. As such, you'll need to make sure that views you're attempting to override
+provide the template with a ``RequestContext`` context type (the default for ```http.render()`` now).
 
 
+**Changing Your Media URLs with asset_url**
+
+If you just need to modify the ``MEDIA_URL`` or ``STATIC_URL``, then you'll want to use the ``asset_url``.
+
+The ``asset_url`` assumes you have a request context (because there's data we tack onto the request object
+about which override we're selecting). You'll use this method in situations in which the static media
+linked to in the template are different than they are for the rest of the site. It works in two parts;
+first, you'll need to define which override is "active" for a given view using a decorator; 
+second, you'll need to make sure that the ``asset_url`` context processor is setup (only needs to happen once).
+Usually, this is necessary when you're doing ``URLConf`` overrides.
+
+In Settings.py:
+```python
+
+from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
+
+TEMPLATE_CONTEXT_PROCESSORS += (
+  'finial.context_processors.asset_url'
+)
+```
+
+In your view:
+```python
+
+from finial.decorators import active_override
+
+@active_override('test_or')
+def override_view(request, *args, **kwargs):
+   # Sometimes it's easiest just to proxy back to the original view.
+   return original_view(request, *args, **kwargs)
+
+```
+
+Now the template returned by ``original_view`` will automatically have their
+``MEDIA_URL``, and ``STATIC_URL`` converted to the appropriate URL for 
+local development, or for production (as defined by ``settings.DEBUG``).
+
+
+**Informing Javascript of Overrides with override_names**
+
+Sometimes your Javascript code will be pretty divorced from your Django deployment. In those cases,
+you cannot rely on Finial to do the right thing. Instead finial comes with the ability to just inform
+Javascript code of which overrides are present for a given user. For this we use the ``override_names``
+context processor.
+
+Consider the following template code (note: this is mean to always be rendered for a site, not just in an override).
+
+```html
+{% if FINIAL_POINTS %}
+ <div id="finial" data-set="{{ FINIAL_POINTS }}"></div>
+{% endif %}
+```
+
+This way, javascript gets a string which it can parse using a JSON parser to get a list of override_names (in priority order),
+and can make the appropriate choices with which functions to include/run, or templates to render.

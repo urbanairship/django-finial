@@ -3,14 +3,14 @@
 from finial.decorators import active_override
 
 from django.conf.urls.defaults import url, patterns
-from django.views.generic.simple import direct_to_template
+from django.template.response import TemplateResponse
 
 """This URLConf is used only in the test_template_context_processor tests."""
 
 
 # a Noop "view"
 def fake_view(request, *args, **kwargs):
-    return direct_to_template(request, 'test_template.html')
+    return TemplateResponse(request, 'test_template.html')
 
 
 # Notice below that we're decorating the view before it gets called.

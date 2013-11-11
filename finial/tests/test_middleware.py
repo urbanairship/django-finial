@@ -7,7 +7,7 @@ import types
 import mimic
 
 from django.core.cache import cache
-from django.conf.urls.defaults import include, patterns, url
+from django.conf.urls import include, patterns, url
 
 from finial import middleware
 from finial import models

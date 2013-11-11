@@ -5,7 +5,7 @@ import simplejson as json
 import types
 
 from django.conf import settings
-from django.conf.urls.defaults import include, url
+from django.conf.urls import include, url
 from django.core.cache import cache
 from django.forms.models import model_to_dict
 

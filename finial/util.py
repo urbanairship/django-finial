@@ -12,7 +12,7 @@ def user_has_override(user, override_name):
     return False
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def add_flag_to_all_users(flag, silent=False, batch_size=1000):
     users_without_override = User.objects.exclude(
         tmpl_overrides__override_name=flag
@@ -51,7 +51,7 @@ def add_flag_to_all_users(flag, silent=False, batch_size=1000):
     UserTemplateOverride.objects.bulk_create(records_to_create)
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def remove_flag_from_all_users(flag, silent=False):
     overrides = UserTemplateOverride.objects.filter(name=flag)
 

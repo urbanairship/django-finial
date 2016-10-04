@@ -1,7 +1,16 @@
 django-finial
 =============
 
+[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
+
 Hierarchical template overriding on a per request basis.
+
+**Deprecation Notice:** This project is no longer actively maintained, and will not be
+updated for future Django versions. You may be interested in similar projects such as
+[django-waffle][] or [gargoyle][].
+
+[django-waffle]: https://waffle.readthedocs.io/en/latest/
+[gargoyle]: https://gargoyle.readthedocs.io/en/latest/
 
 
 Definition

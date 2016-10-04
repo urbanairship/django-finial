@@ -1,3 +1,6 @@
 # (c) 2013 Urban Airship and Contributors
+import warnings
 
-VERSION = (0, 7, 0)
+warnings.warn("django-finial is no longer maintained", DeprecationWarning)
+
+VERSION = (0, 7, 1)
